@@ -1,0 +1,51 @@
+Subiectul 1:
+
+    In poza este realizat un ping de la h0 la h1. Prima data h0 trimite catre r0. Observam din primele 2 pachete cum h0 afla prin arp
+adresa mac a interfetei lui r0 prin care acesta comunica cu r0, interfata ce are adresa ip: 192.168.0.1. 
+    Apoi, observam din 3 ca pachetul a ajuns la r0, avem "no response found!" deoarece in acest punct nu a ajuns la destinatie. Din 4
+si 5 observam cum routerul prin intermediul arp afla adresa mac a lui h1 ce are adresa ip: 192.168.1.2. Trimite catre h1 pe interfata 
+lui catre h1 de adresa ip: 192:168.1.1.
+    La pachetul 6, observam ca routerul a aflat mac ul lui h1, scoate pachetul din coada (unde a fost pus pana sa primeasca arp reply),
+pachetul are ttl ul decrementat si este trimis catre destinatie.
+    De la pachetul 7, observam procesul de intoarcere al ping ului de la h1 la h0 (raspunsul). La pachetele 8 si 9 r0 primeste raspunsul
+de la h1 catre h0 si realizeaza iar o cerere arp pentru a trimite raspunsul. La pachetul 10, observam transmiterea pachetului de echo reply
+la h0 cu ttl ul decrementat.
+
+Subiectul 3:
+
+    Comanda rulata este aceeasi ca la subiectul 1, procesul este acelasi. In poza Subiectul3_request, observam requestul (opcode:
+request (1) ) facut de r0 pentru a afla mac ul lui h1 de adresa ip 192.168.1.2 (target ip address), cu interfata de trimitere catre h1
+de adresa ip 192.168.1.1 (sender ip address).
+    In poza Subiectul3_reply, observam reply ul (opcode: reply (2) ) de la h1 catre r0, h1 avand adresa ip 192.168.1.2 (sender ip address),
+iar interfata lui r0 de comunicare cu h1 avand ip ul 192.168.1.1 (target ip address).
+
+Subiectul 4:
+
+    In poza Subiectul4_ttl_exceeded este realizat un ping de la h0 la h1 cu ttl 1. Prima data h0 trimite catre r0. Observam din primele 2
+pachete cum h0 afla prin arp adresa mac a interfetei lui r0 prin care acesta comunica cu r0, interfata ce are adresa ip: 192.168.0.1.
+    Apoi, observam din 3 ca pachetul a ajuns la r0, avem "no response found!" deoarece in acest punct nu a ajuns la destinatie. Aici r0
+verifica ttl ul pachetului, observa ca expira si returneaza time-to-live exceeded (type 11, code 0).
+
+    In poza Subiectul4_dest_unreachable este realizat un ping de la h0 catre o destinatie necunoscuta (adresa ip: 10.0.1.2).
+Prima data h0 trimite catre r0. Observam din primele 2 pachete cum h0 afla prin arp adresa mac a interfetei lui r0 prin care 
+acesta comunica cu r0, interfata ce are adresa ip: 192.168.0.1.
+    Apoi, observam din 3 ca pachetul a ajuns la r0, avem "no response found!" deoarece in acest punct nu a ajuns la destinatie. Aici r0
+cauta prin longest-prefix-match next-hopul corespunzator, nu gaseste niciun match, returneaza destination-unreachable (type 3, code 0).
+
+Subiectul 2:
+
+    Am folosit arborele de tip trie pentru a pastra si a cauta ulterior intrarile. Prima data trebuie sa trecem toate intrarile in arbore
+corespunzator. Pentru fiecare: verific bitii de la masca de la stanga la dreapta, daca bitul e 1 (inca suntem in partea de prefix), verificam
+bitul de pe aceeasi pozitie din prefix. Daca bitul de la prefix e 0, trebuie sa avansam in partea stanga a arborelui de tip trie 
+(care e si binar) daca este 1 avansam la dreapta (daca stanga sau dreapta sunt NULL, le alocam si apoi avansam). Cand dam de un bit 0 la masca
+inseamna ca am terminat cu bitii importanti, care se verifica la match, si setam valoarea din nodul arborelui in care ne aflam sa pointeze
+spre intrare. 
+    Apoi cand avem nevoie de next-hop, verificam dest_ip tot de la stanga la dreapta (in concordanta cu modul in care am gandit arborele)
+daca este bit 0 mergem stanga, daca e 1, dreapta, de fiecare data cand elementul din nodul unui arbore in care avansam pointeaza spre
+o intrare reactualizam best_route ul, cel mai adanc fiind cel mai specific. Cand dam de un nod de arbore NULL sau terminam toti bitii
+de verificat (tot la NULL in arbore se ajunge) returnam cea mai buna ruta.
+    Aceasta implementare imbunatateste radical complexitatea de timp a cautarii lpm (cautarea liniara in tabela routerului trebuie
+sa parcurga toate intrarile, ce pot fi de un numar foarte mare, abordarea cu trie are ca numar de pasi pentru o cautare maxim 32(numarul
+de biti din adresa ip))
+
+
